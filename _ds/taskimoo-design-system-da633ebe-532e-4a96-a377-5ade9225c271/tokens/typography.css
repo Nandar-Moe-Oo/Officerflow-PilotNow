@@ -1,0 +1,113 @@
+/* ==========================================================================
+   TYPOGRAPHY TOKENS — Taskimoo
+   Editorial: bold geometric sans (Geist) for display + UI, Geist Mono for
+   eyebrows, meta, IDs and timestamps. Big jumps between display and body.
+   ========================================================================== */
+
+:root {
+  /* --- Families --- */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: 'Geist', ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Type scale (px) — editorial: large gaps display↔body --- */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --text-4xl: 44px;
+  --text-5xl: 64px;
+  --text-6xl: 88px;
+
+  /* --- Line heights --- */
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.45;
+  --leading-relaxed: 1.6;
+
+  /* --- Tracking --- */
+  --track-tight: -0.03em;
+  --track-snug: -0.015em;
+  --track-normal: 0;      /* @kind other */
+  --track-wide: 0.04em;
+  --track-caps: 0.08em;   /* eyebrows / mono labels */
+
+  /* --- Weights --- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 800;
+}
+
+/* ==========================================================================
+   SEMANTIC TYPE CLASSES — apply directly to elements
+   ========================================================================== */
+
+/* Display — hero / marketing / big statements */
+.t-display {
+  font-family: var(--font-display);
+  font-size: var(--text-6xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-tight);
+  font-weight: var(--weight-black);
+  color: var(--fg-0);
+}
+.t-display-sm {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-tight);
+  font-weight: var(--weight-bold);
+  color: var(--fg-0);
+}
+
+/* Headings */
+.t-h1 { font-size: var(--text-3xl); line-height: var(--leading-tight); letter-spacing: var(--track-snug); font-weight: var(--weight-bold); color: var(--fg-0); }
+.t-h2 { font-size: var(--text-2xl); line-height: var(--leading-snug); letter-spacing: var(--track-snug); font-weight: var(--weight-semibold); color: var(--fg-0); }
+.t-h3 { font-size: var(--text-xl); line-height: var(--leading-snug); letter-spacing: var(--track-snug); font-weight: var(--weight-semibold); color: var(--fg-0); }
+.t-h4 { font-size: var(--text-lg); line-height: var(--leading-snug); font-weight: var(--weight-semibold); color: var(--fg-0); }
+
+/* Body */
+.t-body    { font-size: var(--text-base); line-height: var(--leading-normal); font-weight: var(--weight-regular); color: var(--fg-0); }
+.t-body-lg { font-size: var(--text-md); line-height: var(--leading-normal); font-weight: var(--weight-regular); color: var(--fg-0); }
+.t-body-sm { font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--fg-1); }
+
+/* Labels & meta */
+.t-label { font-size: var(--text-sm); line-height: 1; font-weight: var(--weight-medium); color: var(--fg-0); }
+.t-meta  { font-size: var(--text-xs); line-height: 1; color: var(--fg-2); font-weight: var(--weight-regular); }
+
+/* Eyebrow / kicker — newspaper section marker. Core editorial motif. */
+.t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+/* Monospace — code, IDs, timestamps */
+.t-mono { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg-1); font-variant-numeric: tabular-nums; }
+.t-code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--bg-2);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-xs);
+  color: var(--fg-0);
+}
+
+/* Quote — testimonials, highlights */
+.t-quote {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--track-snug);
+  font-weight: var(--weight-medium);
+  color: var(--fg-0);
+  font-style: italic;
+}

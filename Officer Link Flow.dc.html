@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/tokens/base.css">
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/tokens/components.css">
+  <link rel="stylesheet" href="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/styles.css">
+  <script src="_ds/taskimoo-design-system-da633ebe-532e-4a96-a377-5ade9225c271/_ds_bundle.js"></script>
+  <style>
+    body { margin: 0; background: var(--bg-1); font-family: var(--font-sans); color: var(--fg-0); }
+    a { color: var(--fg-0); }
+    a:hover { color: var(--red-600); }
+  </style>
+</helmet>
+
+<div data-theme="{{ themeAttr }}" style="min-height: 100vh; background: var(--bg-1); display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 32px 24px 48px;">
+
+  <!-- Page header + screen jumper -->
+  <div style="width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3);">OFFICER LINK · TASK-148 · MOBILE</div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em;">Check-in link flow</h1>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        <sc-for list="{{ navChips }}" as="chip" hint-placeholder-count="4">
+          <button onClick="{{ chip.go }}" style="{{ chip.style }}">{{ chip.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="font-size: 12px; color: var(--fg-2); max-width: 620px;">The officer opens the admin's pre-authorized link — no login. Check in with GPS + proof photos, upload evidence every hour, then check out. Click through the flow inside the phone.</div>
+  </div>
+
+  <!-- Phone -->
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="taskimoo.link" hint-size="430px,880px">
+    <div style="height: 100%; overflow-y: auto; background: var(--bg-0); font-family: var(--font-sans); color: var(--fg-0);">
+
+      <!-- ============ 1 · CHECK-IN ============ -->
+      <sc-if value="{{ isCheckin }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Check-in" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 28px;">
+
+          <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3);">CHECK-IN · TASK-148</span>
+              <span class="pill green"><span class="dot" style="background: var(--success);"></span>Link verified</span>
+            </div>
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2;">Site patrol — Marina Depot</div>
+            <div style="font-size: 12.5px; color: var(--fg-2);">Assigned by D. Rahman (Admin) · Today · 09:00–17:00</div>
+          </div>
+
+          <!-- Task summary -->
+          <div class="section">
+            <div class="section-head"><h3>Assignment</h3><span class="spacer"></span><span class="meta">8h SHIFT</span></div>
+            <div style="display: flex; flex-direction: column;">
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--border-0); font-size: 12.5px;"><span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-3); padding-top: 2px;">SITE</span><span style="text-align: right; font-weight: 500;">Marina Depot, Gate 3, 18 Harbour Rd</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--border-0); font-size: 12.5px;"><span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-3); padding-top: 2px;">EVIDENCE</span><span style="text-align: right; font-weight: 500;">Photo upload every hour, on the hour</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--border-0); font-size: 12.5px;"><span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-3); padding-top: 2px;">CHECK-IN</span><span style="text-align: right; font-weight: 500;">Location + photo required at 09:00</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; font-size: 12.5px;"><span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-3); padding-top: 2px;">CHECK-OUT</span><span style="text-align: right; font-weight: 500;">Location + photo required at 17:00</span></div>
+            </div>
+          </div>
+
+          <!-- GPS -->
+          <div class="section">
+            <div class="section-head"><h3>Your location</h3><span class="spacer"></span><span class="pill green"><span class="dot" style="background: var(--success);"></span>GPS locked · ±8 m</span></div>
+            <div style="position: relative; height: 148px; background: var(--bg-1); background-image: linear-gradient(var(--border-0) 1px, transparent 1px), linear-gradient(90deg, var(--border-0) 1px, transparent 1px); background-size: 28px 28px;">
+              <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--red-500) 14%, transparent); display: flex; align-items: center; justify-content: center;">
+                  <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--red-500); border: 2px solid var(--bg-0);"></div>
+                </div>
+                <span style="font-family: var(--font-mono); font-size: 9.5px; background: var(--bg-0); border: 1px solid var(--border-0); border-radius: 2px; padding: 1px 5px; color: var(--fg-1);">MAP PREVIEW</span>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--border-0);">
+              <span style="font-size: 12px; color: var(--fg-1);">Marina Depot, Gate 3</span>
+              <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--fg-3);">1.2939° N, 103.8560° E</span>
+            </div>
+          </div>
+
+          <!-- Proof photos -->
+          <div class="section">
+            <div class="section-head"><h3>Login proof photo</h3><span class="spacer"></span><span class="meta">{{ checkinCount }} ADDED · MIN 1</span></div>
+            <div class="section-body pad" style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <sc-for list="{{ checkinPhotos }}" as="p" hint-placeholder-count="1">
+                  <div style="aspect-ratio: 1; background: var(--bg-2); border: 1px solid var(--border-0); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative;">
+                    <span style="color: var(--fg-3); display: inline-flex;">{{ icoImage }}</span>
+                    <span style="font-family: var(--font-mono); font-size: 9px; color: var(--fg-3);">{{ p.name }}</span>
+                    <button onClick="{{ p.remove }}" style="position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border-1); background: var(--bg-0); color: var(--fg-2); font-size: 10px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">×</button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onClick="{{ addCheckinCamera }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoCamera }} Camera</button>
+                <button class="btn btn-secondary" onClick="{{ addCheckinGallery }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoImage }} Gallery</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onClick="{{ doCheckin }}" disabled="{{ checkinDisabled }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Confirm check-in · 09:00</button>
+          <div style="font-size: 11px; color: var(--fg-3); text-align: center; margin-top: -8px;">Location and photos are sent to your admin on confirm.</div>
+        </div>
+      </sc-if>
+
+      <!-- ============ 2 · ACTIVE SHIFT ============ -->
+      <sc-if value="{{ isShift }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Active shift" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 28px;">
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 4px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3);">ON SHIFT · TASK-148</span>
+              <span style="font-size: 17px; font-weight: 700; letter-spacing: -0.02em;">Marina Depot</span>
+            </div>
+            <span class="pill green"><span class="dot" style="background: var(--success);"></span>Checked in 09:02</span>
+          </div>
+
+          <!-- Current hour · Mode A (waiting) -->
+          <div class="section" style="border-color: var(--border-1);">
+            <div class="section-head">
+              <h3 style="font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; color: var(--fg-2);">NEXT UPLOAD · {{ nextHour }}</h3>
+              <span class="spacer"></span>
+              <span class="pill mono">Upcoming</span>
+            </div>
+            <div class="section-body pad" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 20px; padding-bottom: 16px;">
+              <span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3);">STARTS IN</span>
+              <span style="font-family: var(--font-mono); font-size: 48px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--fg-0); line-height: 1.1;">{{ countdown }}</span>
+              <span style="font-size: 12px; color: var(--fg-2);">Nothing to do yet — we'll notify you at {{ nextHour }}.</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 0 12px 12px;">
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" disabled="{{ true }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoCamera }} Camera</button>
+                <button class="btn btn-secondary" disabled="{{ true }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoImage }} Gallery</button>
+              </div>
+              <div style="font-size: 11px; color: var(--fg-3); text-align: center;">Too early — the upload window opens at {{ nextHour }}.</div>
+            </div>
+          </div>
+
+          <!-- Late upload window (missed 12:00) -->
+          <sc-if value="{{ showLate }}" hint-placeholder-val="{{ false }}">
+            <div class="section" style="border-color: var(--red-100); border-left: 2px solid var(--red-500);">
+              <div class="section-head" style="background: var(--red-50); border-bottom-color: var(--red-100);">
+                <span style="color: var(--red-600); display: inline-flex;">{{ icoAlert }}</span>
+                <h3 style="color: var(--red-700);">12:00 evidence — missed</h3>
+                <span class="spacer"></span>
+                <span style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--red-600); text-transform: uppercase;">LATE UNTIL 13:00</span>
+              </div>
+              <div class="section-body pad" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 12px; color: var(--fg-1);">You can still upload for the 12:00 hour — it will be marked <span style="font-weight: 600;">Late</span>. At 13:00 this window locks as Missed. Your admin has been notified.</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                  <sc-for list="{{ latePhotos }}" as="p" hint-placeholder-count="1">
+                    <div style="aspect-ratio: 1; background: var(--bg-2); border: 1px solid var(--border-0); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative;">
+                      <span style="color: var(--fg-3); display: inline-flex;">{{ icoImage }}</span>
+                      <span style="font-family: var(--font-mono); font-size: 9px; color: var(--fg-3);">{{ p.name }}</span>
+                      <button onClick="{{ p.remove }}" style="position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border-1); background: var(--bg-0); color: var(--fg-2); font-size: 10px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">×</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary" onClick="{{ addLateCamera }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoCamera }} Camera</button>
+                  <button class="btn btn-secondary" onClick="{{ addLateGallery }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoImage }} Gallery</button>
+                </div>
+                <button class="btn btn-red" onClick="{{ submitLate }}" disabled="{{ lateDisabled }}" style="width: 100%; justify-content: center; min-height: 46px; font-size: 13.5px; font-weight: 600;">Submit 12:00 evidence as late</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Hour timeline -->
+          <div class="section">
+            <div class="section-head"><h3>Today's evidence</h3><span class="spacer"></span><span class="meta">{{ timelineMeta }}</span></div>
+            <div style="display: flex; flex-direction: column;">
+              <sc-for list="{{ timeline }}" as="h" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--border-0);">
+                  <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--fg-1); width: 44px; font-variant-numeric: tabular-nums;">{{ h.time }}</span>
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ h.dot }}; flex-shrink: 0;"></span>
+                  <span style="font-size: 12.5px; color: var(--fg-1); flex: 1;">{{ h.label }}</span>
+                  <span class="pill {{ h.tone }}">{{ h.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary" onClick="{{ goCheckout }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Check out</button>
+        </div>
+      </sc-if>
+
+      <!-- ============ 3 · CHECK-OUT ============ -->
+      <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Check-out" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 28px;">
+
+          <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 4px;">
+            <span style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3);">CHECK-OUT · TASK-148</span>
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.02em;">End of shift</div>
+            <div style="font-size: 12.5px; color: var(--fg-2);">Confirm your location and add a final proof photo.</div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><h3>Your location</h3><span class="spacer"></span><span class="pill green"><span class="dot" style="background: var(--success);"></span>GPS locked · ±6 m</span></div>
+            <div style="position: relative; height: 120px; background: var(--bg-1); background-image: linear-gradient(var(--border-0) 1px, transparent 1px), linear-gradient(90deg, var(--border-0) 1px, transparent 1px); background-size: 28px 28px;">
+              <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--red-500) 14%, transparent); display: flex; align-items: center; justify-content: center;">
+                  <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--red-500); border: 2px solid var(--bg-0);"></div>
+                </div>
+                <span style="font-family: var(--font-mono); font-size: 9.5px; background: var(--bg-0); border: 1px solid var(--border-0); border-radius: 2px; padding: 1px 5px; color: var(--fg-1);">MAP PREVIEW</span>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--border-0);">
+              <span style="font-size: 12px; color: var(--fg-1);">Marina Depot, Gate 3</span>
+              <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--fg-3);">16:58 · ON SITE</span>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><h3>Check-out photos</h3><span class="spacer"></span><span class="meta">{{ checkoutCount }} ADDED · MIN 1</span></div>
+            <div class="section-body pad" style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <sc-for list="{{ checkoutPhotos }}" as="p" hint-placeholder-count="1">
+                  <div style="aspect-ratio: 1; background: var(--bg-2); border: 1px solid var(--border-0); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative;">
+                    <span style="color: var(--fg-3); display: inline-flex;">{{ icoImage }}</span>
+                    <span style="font-family: var(--font-mono); font-size: 9px; color: var(--fg-3);">{{ p.name }}</span>
+                    <button onClick="{{ p.remove }}" style="position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border-1); background: var(--bg-0); color: var(--fg-2); font-size: 10px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">×</button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onClick="{{ addCheckoutCamera }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoCamera }} Camera</button>
+                <button class="btn btn-secondary" onClick="{{ addCheckoutGallery }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoImage }} Gallery</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-primary" onClick="{{ doCheckout }}" disabled="{{ checkoutDisabled }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Confirm check-out · 17:00</button>
+            <button class="btn btn-ghost" onClick="{{ backToShift }}" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13px; color: var(--fg-2);">Back to shift</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ 4 · DONE ============ -->
+      <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Shift complete" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 28px;">
+
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 0 8px; text-align: center;">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--fg-0); color: var(--bg-0); display: flex; align-items: center; justify-content: center;">{{ icoCheckBig }}</div>
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.02em;">Shift recorded</div>
+            <div style="font-size: 12.5px; color: var(--fg-2); max-width: 260px;">Your check-in, hourly evidence and check-out were sent to D. Rahman.</div>
+          </div>
+
+          <div class="run-bar" style="grid-template-columns: repeat(3, 1fr);">
+            <div><span class="n">8h</span><span class="l">ON SITE</span></div>
+            <div class="{{ doneEvidenceClass }}"><span class="n">{{ doneEvidence }}</span><span class="l">EVIDENCE</span></div>
+            <div class="{{ doneMissedClass }}"><span class="n">{{ doneMissed }}</span><span class="l">MISSED</span></div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><h3>Shift log</h3><span class="spacer"></span><span class="meta">TASK-148</span></div>
+            <div style="display: flex; flex-direction: column;">
+              <sc-for list="{{ doneLog }}" as="h" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--border-0);">
+                  <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--fg-1); width: 44px; font-variant-numeric: tabular-nums;">{{ h.time }}</span>
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ h.dot }}; flex-shrink: 0;"></span>
+                  <span style="font-size: 12.5px; color: var(--fg-1); flex: 1;">{{ h.label }}</span>
+                  <span class="pill {{ h.tone }}">{{ h.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="font-size: 11.5px; color: var(--fg-3); text-align: center;">You can close this page. Payment is settled by your admin after review.</div>
+          <button class="btn btn-ghost" onClick="{{ restart }}" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13px; color: var(--fg-2);">Restart demo</button>
+        </div>
+      </sc-if>
+
+    </div>
+  </x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;darkTheme&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Theme&quot;}, &quot;showMissedHour&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Scenario&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'checkin',
+    checkinPhotos: [{ id: 'IMG_0139' }, { id: 'IMG_0140' }],
+    hourPhotos: [],
+    checkoutPhotos: [{ id: 'IMG_0158' }],
+    latePhotos: [],
+    submitted12: false,
+    submitted13: false,
+    secondsLeft: 14 * 60 + 32,
+    photoSeq: 141
+  };
+
+  componentDidMount() {
+    this._t = setInterval(() => {
+      this.setState(s => ({ secondsLeft: s.secondsLeft > 0 ? s.secondsLeft - 1 : 59 * 60 + 59 }));
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  icon(paths, size) {
+    return React.createElement('svg', {
+      width: size || 15, height: size || 15, viewBox: '0 0 24 24', fill: 'none',
+      stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round'
+    }, paths.map((d, i) => React.createElement('path', { key: i, d })));
+  }
+
+  makePhoto(key) {
+    const name = 'IMG_0' + this.state.photoSeq;
+    this.setState(s => ({ photoSeq: s.photoSeq + 1, [key]: s[key].concat([{ id: name }]) }));
+  }
+  removePhoto(key, id) {
+    this.setState(s => ({ [key]: s[key].filter(p => p.id !== id) }));
+  }
+  mapPhotos(key) {
+    return this.state[key].map(p => ({ name: p.id, remove: () => this.removePhoto(key, p.id) }));
+  }
+
+  fmt(sec) {
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+  }
+
+  chipStyle(active) {
+    return {
+      fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.04em',
+      padding: '5px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+      border: '1px solid ' + (active ? 'var(--fg-0)' : 'var(--border-1)'),
+      background: active ? 'var(--fg-0)' : 'var(--bg-0)',
+      color: active ? 'var(--bg-0)' : 'var(--fg-1)'
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const showMissed = this.props.showMissedHour ?? true;
+    const late = showMissed && !s.submitted12 && !s.submitted13 && s.screen === 'shift';
+    const go = (screen) => () => this.setState({ screen });
+
+    const screens = [['checkin', '1 CHECK-IN'], ['shift', '2 ON SHIFT'], ['checkout', '3 CHECK-OUT'], ['done', '4 DONE']];
+
+    const timeline = [
+      { time: '09:00', label: 'Check-in · GPS + 2 photos', status: 'Done', tone: 'green', dot: 'var(--success)' },
+      { time: '10:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' },
+      { time: '11:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' }
+    ];
+    if (!showMissed) timeline.push({ time: '12:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' });
+    else if (s.submitted12) timeline.push({ time: '12:00', label: 'Hourly evidence · ' + (s._sub12n || 1) + ' photo · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' });
+    else timeline.push({ time: '12:00', label: 'Hourly evidence · late window open', status: 'Upload late', tone: 'red', dot: 'var(--red-500)' });
+    timeline.push(s.submitted13
+      ? { time: '13:00', label: 'Hourly evidence · ' + (s._sub13n || 1) + ' photo', status: 'Done', tone: 'green', dot: 'var(--success)' }
+      : { time: '13:00', label: 'Hourly evidence · next up', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' });
+    ['14:00', '15:00', '16:00'].forEach(t => timeline.push({ time: t, label: 'Hourly evidence', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' }));
+    timeline.push({ time: '17:00', label: 'Check-out · GPS + photo', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' });
+
+    const doneCount = timeline.filter(h => h.status === 'Done').length;
+    const missedN = showMissed ? 1 : 0;
+
+    const doneLog = [
+      { time: '09:02', label: 'Checked in · GPS ±8 m · 2 photos', status: 'OK', tone: 'green', dot: 'var(--success)' },
+      { time: '10–13', label: 'Hourly evidence uploads', status: showMissed ? '3 of 4' : '4 of 4', tone: showMissed ? 'amber' : 'green', dot: showMissed ? 'var(--warning)' : 'var(--success)' },
+      { time: '14–16', label: 'Hourly evidence uploads', status: '3 of 3', tone: 'green', dot: 'var(--success)' },
+      { time: '17:00', label: 'Checked out · GPS ±6 m · ' + Math.max(s.checkoutPhotos.length, 1) + ' photo', status: 'OK', tone: 'green', dot: 'var(--success)' }
+    ];
+    if (showMissed) doneLog.splice(2, 0, s.submitted12
+      ? { time: '12:00', label: 'Hourly evidence · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' }
+      : { time: '12:00', label: 'Hourly evidence', status: 'Missed', tone: 'red', dot: 'var(--red-500)' });
+
+    return {
+      themeAttr: (this.props.darkTheme ?? false) ? 'dark' : 'light',
+      isCheckin: s.screen === 'checkin',
+      isShift: s.screen === 'shift',
+      isCheckout: s.screen === 'checkout',
+      isDone: s.screen === 'done',
+
+      navChips: screens.map(([id, label]) => ({ label, go: go(id), style: this.chipStyle(s.screen === id) })),
+
+      // icons
+      icoCamera: this.icon(['M14.5 4h-5L7.4 6.5H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2h-3.4L14.5 4z', 'M12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z']),
+      icoImage: this.icon(['M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z', 'M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z', 'M21 15l-5-5L5 21']),
+      icoAlert: this.icon(['M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z', 'M12 9v4', 'M12 17h.01']),
+      icoCheckBig: this.icon(['M20 6 9 17l-5-5'], 24),
+
+      // check-in
+      checkinPhotos: this.mapPhotos('checkinPhotos'),
+      checkinCount: String(s.checkinPhotos.length),
+      checkinDisabled: s.checkinPhotos.length === 0,
+      addCheckinCamera: () => this.makePhoto('checkinPhotos'),
+      addCheckinGallery: () => this.makePhoto('checkinPhotos'),
+      doCheckin: () => this.setState({ screen: 'shift' }),
+
+      // shift
+      countdown: this.fmt(s.secondsLeft),
+      nextHour: s.submitted13 ? '14:00' : '13:00',
+      true: true,
+      showLate: late,
+      currentHourTitle: s.submitted13 ? '14:00 evidence' : '13:00 evidence — due now',
+      latePhotos: this.mapPhotos('latePhotos'),
+      lateDisabled: s.latePhotos.length === 0,
+      addLateCamera: () => this.makePhoto('latePhotos'),
+      addLateGallery: () => this.makePhoto('latePhotos'),
+      submitLate: () => this.setState(st => ({ submitted12: true, _sub12n: st.latePhotos.length, latePhotos: [] })),
+      hourPhotos: this.mapPhotos('hourPhotos'),
+      hourCount: String(s.hourPhotos.length),
+      hourDisabled: s.hourPhotos.length === 0,
+      submitHourLabel: s.submitted13 ? 'Submit 14:00 evidence' : 'Submit 13:00 evidence',
+      addHourCamera: () => this.makePhoto('hourPhotos'),
+      addHourGallery: () => this.makePhoto('hourPhotos'),
+      submitHour: () => this.setState(st => ({ submitted13: true, _sub13n: st.hourPhotos.length, hourPhotos: [], secondsLeft: 59 * 60 + 59 })),
+      timeline,
+      timelineMeta: doneCount + ' OF 9 DONE',
+      goCheckout: go('checkout'),
+
+      // check-out
+      checkoutPhotos: this.mapPhotos('checkoutPhotos'),
+      checkoutCount: String(s.checkoutPhotos.length),
+      checkoutDisabled: s.checkoutPhotos.length === 0,
+      addCheckoutCamera: () => this.makePhoto('checkoutPhotos'),
+      addCheckoutGallery: () => this.makePhoto('checkoutPhotos'),
+      doCheckout: () => this.setState({ screen: 'done' }),
+      backToShift: go('shift'),
+
+      // done
+      doneEvidence: (showMissed ? '7/8' : '8/8'),
+      doneEvidenceClass: showMissed ? 'block' : 'pass',
+      doneMissed: String(missedN),
+      doneMissedClass: missedN ? 'fail' : 'pass',
+      doneLog,
+      restart: () => this.setState({ screen: 'checkin', checkinPhotos: [{ id: 'IMG_0139' }, { id: 'IMG_0140' }], hourPhotos: [], checkoutPhotos: [{ id: 'IMG_0158' }], latePhotos: [], submitted12: false, submitted13: false, secondsLeft: 14 * 60 + 32 })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+/* ==========================================================================
+   SPACING, RADIUS, SHADOW, MOTION — Taskimoo
+   4px spacing base. Subtle radii (2–10px). Almost no shadow — hairlines and
+   1px borders do the structural work; shadows are reserved for overlays.
+   ========================================================================== */
+
+:root {
+  /* --- Spacing scale — 4px base --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* --- Radius — subtle --- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+
+  /* --- Shadows — editorial means almost none. Hairlines carry structure. --- */
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(255, 59, 48, 0.25);
+  /* legacy alias used by some auth surfaces */
+  --shadow-2: var(--shadow-md);
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);    /* @kind other */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* @kind other */
+  --dur-fast: 120ms;                             /* @kind other */
+  --dur-med: 200ms;                              /* @kind other */
+  --dur-slow: 320ms;                             /* @kind other */
+}
+
+:root[data-theme="dark"],
+.theme-dark {
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(255, 59, 48, 0.4);
+}

@@ -1,0 +1,13 @@
+/* ==========================================================================
+   FONTS — Geist + Geist Mono
+   Taskimoo ships Geist (modern geometric sans) and Geist Mono.
+   Both are open-source (Vercel, OFL) and served from Google Fonts here.
+
+   FLAGGED — self-hosting:
+   If you have licensed/optimised Geist binaries, drop the WOFF2/TTF files in
+   tokens/fonts/ and replace the @import below with @font-face blocks that
+   point at them (the compiler ships any `src: url(...)` targets to consumers).
+   The Google Fonts @import works for any HTML file that links styles.css.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap');
