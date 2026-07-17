@@ -180,22 +180,22 @@
                   <button class="btn btn-secondary" onClick="{{ addHourGallery }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoImage }} Gallery</button>
                 </div>
                 <button class="btn btn-primary" onClick="{{ submitHour }}" disabled="{{ hourDisabled }}" style="width: 100%; justify-content: center; min-height: 46px; font-size: 13.5px; font-weight: 600;">{{ submitHourLabel }}</button>
-                <div style="font-size: 11px; color: var(--fg-3); text-align: center;">After {{ windowCloseAt }} this hour locks as Missed and {{ hourAfter }} starts counting.</div>
+                <div style="font-size: 11px; color: var(--fg-3); text-align: center;">Upload now to be on time. After {{ windowCloseAt }} it moves to the missed section — still uploadable as Late until {{ hourLockAt }}.</div>
               </div>
             </div>
           </sc-if>
 
-          <!-- Late upload window (missed 12:00) -->
-          <sc-if value="{{ showLate }}" hint-placeholder-val="{{ false }}">
+          <!-- Miss section · hour whose 5-min window closed — still uploadable as Late until the next window closes -->
+          <sc-if value="{{ showLate }}" hint-placeholder-val="{{ true }}">
             <div class="section" style="border-color: var(--red-100); border-left: 2px solid var(--red-500);">
               <div class="section-head" style="background: var(--red-50); border-bottom-color: var(--red-100);">
                 <span style="color: var(--red-600); display: inline-flex;">{{ icoAlert }}</span>
-                <h3 style="color: var(--red-700);">12:00 evidence — missed</h3>
+                <h3 style="color: var(--red-700);">{{ lateHourLabel }} evidence — missed</h3>
                 <span class="spacer"></span>
-                <span style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--red-600); text-transform: uppercase;">LATE UNTIL 13:00</span>
+                <span style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--red-600); text-transform: uppercase;">LATE UNTIL {{ lateLockAt }}</span>
               </div>
               <div class="section-body pad" style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="font-size: 12px; color: var(--fg-1);">You can still upload for the 12:00 hour — it will be marked <span style="font-weight: 600;">Late</span>. At 13:00 this window locks as Missed. Your admin has been notified.</div>
+                <div style="font-size: 12px; color: var(--fg-1);">You can still upload for the {{ lateHourLabel }} hour — it will be marked <span style="font-weight: 600;">Late</span>. At {{ lateLockAt }} this window locks as Missed. Your admin has been notified.</div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
                   <sc-for list="{{ latePhotos }}" as="p" hint-placeholder-count="1">
                     <div style="aspect-ratio: 1; background: var(--bg-2); border: 1px solid var(--border-0); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative;">
@@ -209,7 +209,7 @@
                   <button class="btn btn-secondary" onClick="{{ addLateCamera }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoCamera }} Camera</button>
                   <button class="btn btn-secondary" onClick="{{ addLateGallery }}" style="flex: 1; justify-content: center; min-height: 44px; font-size: 13px;">{{ icoImage }} Gallery</button>
                 </div>
-                <button class="btn btn-red" onClick="{{ submitLate }}" disabled="{{ lateDisabled }}" style="width: 100%; justify-content: center; min-height: 46px; font-size: 13.5px; font-weight: 600;">Submit 12:00 evidence as late</button>
+                <button class="btn btn-red" onClick="{{ submitLate }}" disabled="{{ lateDisabled }}" style="width: 100%; justify-content: center; min-height: 46px; font-size: 13.5px; font-weight: 600;">{{ lateSubmitLabel }}</button>
               </div>
             </div>
           </sc-if>
@@ -325,9 +325,18 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;darkTheme&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Theme&quot;}, &quot;showMissedHour&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Scenario&quot;}}">
-const HOURS = ['13:00', '14:00', '15:00', '16:00'];
-const WINDOW_SEC = 5 * 60;   // upload window stays open 5 min from the top of the hour
+// Every evidence hour H rolls through four stages:
+//   upcoming              before H:00
+//   open      H:00 -> H:05     on-time upload (5-min window)
+//   lateopen  H:05 -> H+1:00   missed section — still uploadable, marked Late
+//   missed    from H+1:00      locked, no upload
+// The missed section holds one hour at a time and always empties at the top of
+// the next hour: when H+1's window opens, H stops showing and locks as Missed.
+// So the open window and the missed section are never on screen together.
+const HOURS = [12, 13, 14, 15, 16];   // hours that require evidence
+const WINDOW_SEC = 5 * 60;            // on-time window from the top of the hour
 const HOUR_SEC = 60 * 60;
+const START_SEC = 13 * HOUR_SEC - 25; // demo starts 12:59:35, so 13:00 opens shortly
 
 class Component extends DCLogic {
   state = {
@@ -336,16 +345,10 @@ class Component extends DCLogic {
     hourPhotos: [],
     checkoutPhotos: [{ id: 'IMG_0158' }],
     latePhotos: [],
-    submitted12: false,
     photoSeq: 141,
 
-    // hour-window machine
-    phase: 'waiting',        // 'waiting' = too early | 'open' = inside the 5-min window
-    hourIdx: -1,             // current hour in HOURS; -1 = none open yet, 13:00 is next
-    secondsLeft: 25,         // until the next window opens (short so the demo reaches 13:00)
-    windowLeft: WINDOW_SEC,  // until the open window closes
-    hourStatus: {},          // '13:00' -> 'done' | 'missed'
-    late12Locked: false      // 12:00 late window closes for good once 13:00 opens
+    now: START_SEC,   // seconds since midnight — the single source of truth
+    subs: {}          // hour -> { status: 'done' | 'late', n: photoCount }
   };
 
   componentDidMount() {
@@ -356,39 +359,42 @@ class Component extends DCLogic {
   tick() {
     this.setState(s => {
       if (s.screen !== 'shift') return null;   // clock only runs while on shift
-
-      if (s.phase === 'open') {
-        if (s.windowLeft > 1) return { windowLeft: s.windowLeft - 1 };
-        // window expired with nothing submitted -> this hour locks as Missed
-        const hour = HOURS[s.hourIdx];
-        return {
-          phase: 'waiting',
-          windowLeft: 0,
-          hourPhotos: [],
-          hourStatus: Object.assign({}, s.hourStatus, { [hour]: s.hourStatus[hour] || 'missed' }),
-          secondsLeft: HOUR_SEC - WINDOW_SEC
-        };
-      }
-
-      if (s.secondsLeft > 1) return { secondsLeft: s.secondsLeft - 1 };
-      // next hour arrives -> open its 5-minute window
-      return {
-        hourIdx: Math.min(s.hourIdx + 1, HOURS.length - 1),
-        phase: 'open',
-        windowLeft: WINDOW_SEC,
-        secondsLeft: 0,
-        late12Locked: true
-      };
+      const now = s.now + 1;
+      const p = { now };
+      // drop staged photos when the card they belong to hands over to a new hour
+      if (this.openHour(s.now, s.subs) !== this.openHour(now, s.subs)) p.hourPhotos = [];
+      if (this.lateHour(s.now, s.subs) !== this.lateHour(now, s.subs)) p.latePhotos = [];
+      return p;
     });
   }
 
-  // '13:00' + 5 min -> '13:05'
-  closesAt(hour) {
-    const [h, m] = hour.split(':').map(Number);
-    const t = h * 60 + m + WINDOW_SEC / 60;
-    const hh = Math.floor(t / 60) % 24, mm = t % 60;
-    return (hh < 10 ? '0' + hh : hh) + ':' + (mm < 10 ? '0' + mm : mm);
+  // Which stage hour h is in at time `now`. Everything else derives from this.
+  //   upcoming | open (on-time window) | lateopen (missed section) | missed
+  //   done | late  -- once submitted, whichever window it came through
+  statusOf(h, now, subs) {
+    if (h === 12 && !(this.props.showMissedHour ?? true)) return 'done';
+    if (subs[h]) return subs[h].status;            // 'done' | 'late'
+    const opens = h * HOUR_SEC;
+    if (now < opens) return 'upcoming';
+    if (now < opens + WINDOW_SEC) return 'open';
+    if (now < opens + HOUR_SEC) return 'lateopen';  // grace ends at the top of the next hour
+    return 'missed';
   }
+
+  openHour(now, subs) {
+    const h = HOURS.find(x => this.statusOf(x, now, subs) === 'open');
+    return h === undefined ? null : h;
+  }
+  lateHour(now, subs) {
+    const h = HOURS.find(x => this.statusOf(x, now, subs) === 'lateopen');
+    return h === undefined ? null : h;
+  }
+
+  hhmm(sec) {
+    const h = Math.floor(sec / HOUR_SEC) % 24, m = Math.floor((sec % HOUR_SEC) / 60);
+    return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+  }
+  label(h) { return this.hhmm(h * HOUR_SEC); }
 
   icon(paths, size) {
     return React.createElement('svg', {
@@ -426,48 +432,62 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     const showMissed = this.props.showMissedHour ?? true;
-    const late = showMissed && !s.submitted12 && !s.late12Locked && s.screen === 'shift';
     const go = (screen) => () => this.setState({ screen });
 
-    const open = s.phase === 'open';
-    const hourLabel = HOURS[s.hourIdx] || HOURS[0];
-    const nextHour = HOURS[s.hourIdx + 1] || '17:00';
+    const openH = this.openHour(s.now, s.subs);
+    const lateH = this.lateHour(s.now, s.subs);
+    const open = openH !== null;
+
+    // next hour whose window hasn't opened yet; falls through to check-out
+    const nextH = HOURS.find(h => this.statusOf(h, s.now, s.subs) === 'upcoming');
+    const nextAt = nextH === undefined ? 17 * HOUR_SEC : nextH * HOUR_SEC;
+
+    const hourLabel = this.label(openH === null ? (nextH === undefined ? 17 : nextH) : openH);
+    const windowLeft = open ? (openH * HOUR_SEC + WINDOW_SEC - s.now) : 0;
 
     const screens = [['checkin', '1 CHECK-IN'], ['shift', '2 ON SHIFT'], ['checkout', '3 CHECK-OUT'], ['done', '4 DONE']];
+
+    const ROW = {
+      done:     n => ({ label: 'Hourly evidence · ' + n + ' photo', status: 'Done', tone: 'green', dot: 'var(--success)' }),
+      late:     n => ({ label: 'Hourly evidence · ' + n + ' photo · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' }),
+      missed:   () => ({ label: 'Hourly evidence · window closed', status: 'Missed', tone: 'red', dot: 'var(--red-500)' }),
+      upcoming: () => ({ label: 'Hourly evidence', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' })
+    };
 
     const timeline = [
       { time: '09:00', label: 'Check-in · GPS + 2 photos', status: 'Done', tone: 'green', dot: 'var(--success)' },
       { time: '10:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' },
       { time: '11:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' }
     ];
-    if (!showMissed) timeline.push({ time: '12:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' });
-    else if (s.submitted12) timeline.push({ time: '12:00', label: 'Hourly evidence · ' + (s._sub12n || 1) + ' photo · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' });
-    else if (s.late12Locked) timeline.push({ time: '12:00', label: 'Hourly evidence · window closed', status: 'Missed', tone: 'red', dot: 'var(--red-500)' });
-    else timeline.push({ time: '12:00', label: 'Hourly evidence · late window open', status: 'Upload late', tone: 'red', dot: 'var(--red-500)' });
-
-    HOURS.forEach((t, i) => {
-      const st = s.hourStatus[t];
-      if (st === 'done') timeline.push({ time: t, label: 'Hourly evidence · ' + (s['_sub' + t] || 1) + ' photo', status: 'Done', tone: 'green', dot: 'var(--success)' });
-      else if (st === 'missed') timeline.push({ time: t, label: 'Hourly evidence · window closed', status: 'Missed', tone: 'red', dot: 'var(--red-500)' });
-      else if (open && i === s.hourIdx) timeline.push({ time: t, label: 'Hourly evidence · 5-min window open', status: this.fmt(s.windowLeft) + ' left', tone: 'amber', dot: 'var(--warning)' });
-      else if (i === s.hourIdx + 1) timeline.push({ time: t, label: 'Hourly evidence · next up', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' });
-      else timeline.push({ time: t, label: 'Hourly evidence', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' });
+    HOURS.forEach(h => {
+      const st = this.statusOf(h, s.now, s.subs);
+      const n = (s.subs[h] && s.subs[h].n) || 1;
+      let row;
+      if (st === 'open') row = { label: 'Hourly evidence · 5-min window open', status: this.fmt(h * HOUR_SEC + WINDOW_SEC - s.now) + ' left', tone: 'amber', dot: 'var(--warning)' };
+      else if (st === 'lateopen') row = { label: 'Hourly evidence · late window open', status: 'Upload late', tone: 'red', dot: 'var(--red-500)' };
+      else if (st === 'upcoming' && h === nextH) row = { label: 'Hourly evidence · next up', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' };
+      else row = ROW[st](n);
+      timeline.push(Object.assign({ time: this.label(h) }, row));
     });
     timeline.push({ time: '17:00', label: 'Check-out · GPS + photo', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' });
 
     const doneCount = timeline.filter(h => h.status === 'Done').length;
-    const missedHours = HOURS.filter(t => s.hourStatus[t] === 'missed').length;
-    const missedN = (showMissed && !s.submitted12 ? 1 : 0) + missedHours;
+    // only hours whose late window has closed count as missed; hours the demo
+    // hasn't reached yet are assumed uploaded, as the original shift log did
+    const missedN = HOURS.filter(h => this.statusOf(h, s.now, s.subs) === 'missed').length;
 
     const doneLog = [
       { time: '09:02', label: 'Checked in · GPS ±8 m · 2 photos', status: 'OK', tone: 'green', dot: 'var(--success)' },
-      { time: '10–13', label: 'Hourly evidence uploads', status: showMissed ? '3 of 4' : '4 of 4', tone: showMissed ? 'amber' : 'green', dot: showMissed ? 'var(--warning)' : 'var(--success)' },
-      { time: '14–16', label: 'Hourly evidence uploads', status: '3 of 3', tone: 'green', dot: 'var(--success)' },
-      { time: '17:00', label: 'Checked out · GPS ±6 m · ' + Math.max(s.checkoutPhotos.length, 1) + ' photo', status: 'OK', tone: 'green', dot: 'var(--success)' }
+      { time: '10–11', label: 'Hourly evidence uploads', status: '2 of 2', tone: 'green', dot: 'var(--success)' }
     ];
-    if (showMissed) doneLog.splice(2, 0, s.submitted12
-      ? { time: '12:00', label: 'Hourly evidence · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' }
-      : { time: '12:00', label: 'Hourly evidence', status: 'Missed', tone: 'red', dot: 'var(--red-500)' });
+    HOURS.forEach(h => {
+      const st = this.statusOf(h, s.now, s.subs);
+      doneLog.push(Object.assign({ time: this.label(h) },
+        st === 'missed' ? { label: 'Hourly evidence', status: 'Missed', tone: 'red', dot: 'var(--red-500)' }
+        : st === 'late' ? { label: 'Hourly evidence · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' }
+        : { label: 'Hourly evidence', status: 'OK', tone: 'green', dot: 'var(--success)' }));
+    });
+    doneLog.push({ time: '17:00', label: 'Checked out · GPS ±6 m · ' + Math.max(s.checkoutPhotos.length, 1) + ' photo', status: 'OK', tone: 'green', dot: 'var(--success)' });
 
     return {
       themeAttr: (this.props.darkTheme ?? false) ? 'dark' : 'light',
@@ -493,26 +513,33 @@ class Component extends DCLogic {
       doCheckin: () => this.setState({ screen: 'shift' }),
 
       // shift
-      countdown: this.fmt(s.secondsLeft),
-      nextHour,
+      countdown: this.fmt(nextAt - s.now),
+      nextHour: this.hhmm(nextAt),
       true: true,
-      showLate: late,
 
-      // 5-min upload window
+      // 5-min on-time window
       isWaiting: !open,
       isWindowOpen: open,
       hourLabel,
-      hourAfter: HOURS[s.hourIdx + 1] || 'check-out',
-      windowCountdown: this.fmt(s.windowLeft),
-      windowCloseAt: this.closesAt(hourLabel),
-      windowPct: Math.round((s.windowLeft / WINDOW_SEC) * 100) + '%',
-      windowColor: s.windowLeft <= 60 ? 'var(--red-500)' : 'var(--warning)',
+      windowCountdown: this.fmt(windowLeft),
+      windowCloseAt: this.hhmm((openH === null ? 13 : openH) * HOUR_SEC + WINDOW_SEC),
+      hourLockAt: this.hhmm(((openH === null ? 13 : openH) + 1) * HOUR_SEC),
+      windowPct: Math.round((windowLeft / WINDOW_SEC) * 100) + '%',
+      windowColor: windowLeft <= 60 ? 'var(--red-500)' : 'var(--warning)',
 
+      // missed section — the hour that closed but is still uploadable as Late
+      showLate: lateH !== null && s.screen === 'shift',
+      lateHourLabel: this.label(lateH === null ? 12 : lateH),
+      lateLockAt: this.hhmm(((lateH === null ? 12 : lateH) + 1) * HOUR_SEC),
+      lateSubmitLabel: 'Submit ' + this.label(lateH === null ? 12 : lateH) + ' evidence as late',
       latePhotos: this.mapPhotos('latePhotos'),
       lateDisabled: s.latePhotos.length === 0,
       addLateCamera: () => this.makePhoto('latePhotos'),
       addLateGallery: () => this.makePhoto('latePhotos'),
-      submitLate: () => this.setState(st => ({ submitted12: true, _sub12n: st.latePhotos.length, latePhotos: [] })),
+      submitLate: () => this.setState(st => ({
+        subs: Object.assign({}, st.subs, { [lateH]: { status: 'late', n: st.latePhotos.length } }),
+        latePhotos: []
+      })),
       hourPhotos: this.mapPhotos('hourPhotos'),
       hourCount: String(s.hourPhotos.length),
       hourDisabled: s.hourPhotos.length === 0,
@@ -520,12 +547,8 @@ class Component extends DCLogic {
       addHourCamera: () => this.makePhoto('hourPhotos'),
       addHourGallery: () => this.makePhoto('hourPhotos'),
       submitHour: () => this.setState(st => ({
-        phase: 'waiting',
-        hourStatus: Object.assign({}, st.hourStatus, { [hourLabel]: 'done' }),
-        ['_sub' + hourLabel]: st.hourPhotos.length,
-        hourPhotos: [],
-        windowLeft: 0,
-        secondsLeft: HOUR_SEC - (WINDOW_SEC - st.windowLeft)   // remainder of the hour
+        subs: Object.assign({}, st.subs, { [openH]: { status: 'done', n: st.hourPhotos.length } }),
+        hourPhotos: []
       })),
       timeline,
       timelineMeta: doneCount + ' OF 9 DONE',
@@ -550,9 +573,7 @@ class Component extends DCLogic {
         screen: 'checkin',
         checkinPhotos: [{ id: 'IMG_0139' }, { id: 'IMG_0140' }],
         hourPhotos: [], checkoutPhotos: [{ id: 'IMG_0158' }], latePhotos: [],
-        submitted12: false,
-        phase: 'waiting', hourIdx: -1, secondsLeft: 25, windowLeft: WINDOW_SEC,
-        hourStatus: {}, late12Locked: false
+        now: START_SEC, subs: {}
       })
     };
   }
