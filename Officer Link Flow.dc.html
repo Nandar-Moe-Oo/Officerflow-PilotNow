@@ -41,7 +41,7 @@
 
   <!-- Phone -->
   <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="taskimoo.link" hint-size="430px,880px">
-    <div style="height: 100%; overflow-y: auto; background: var(--bg-0); font-family: var(--font-sans); color: var(--fg-0);">
+    <div style="position: relative; height: 100%; overflow-y: auto; background: var(--bg-0); font-family: var(--font-sans); color: var(--fg-0);">
 
       <!-- ============ 1 · CHECK-IN ============ -->
       <sc-if value="{{ isCheckin }}" hint-placeholder-val="{{ true }}">
@@ -219,17 +219,40 @@
             <div class="section-head"><h3>Today's evidence</h3><span class="spacer"></span><span class="meta">{{ timelineMeta }}</span></div>
             <div style="display: flex; flex-direction: column;">
               <sc-for list="{{ timeline }}" as="h" hint-placeholder-count="5">
-                <div style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--border-0);">
-                  <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--fg-1); width: 44px; font-variant-numeric: tabular-nums;">{{ h.time }}</span>
-                  <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ h.dot }}; flex-shrink: 0;"></span>
-                  <span style="font-size: 12.5px; color: var(--fg-1); flex: 1;">{{ h.label }}</span>
-                  <span class="pill {{ h.tone }}">{{ h.status }}</span>
+                <div style="border-bottom: 1px solid var(--border-0);">
+                  <div onClick="{{ h.toggle }}" style="{{ h.rowStyle }}">
+                    <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--fg-1); width: 44px; font-variant-numeric: tabular-nums;">{{ h.time }}</span>
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ h.dot }}; flex-shrink: 0;"></span>
+                    <span style="font-size: 12.5px; color: var(--fg-1); flex: 1;">{{ h.label }}</span>
+                    <span class="pill {{ h.tone }}">{{ h.status }}</span>
+                    <span style="{{ h.caretStyle }}">{{ h.caret }}</span>
+                  </div>
+                  <sc-if value="{{ h.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 2px 12px 12px 46px;">
+                      <sc-if value="{{ h.hasPhotos }}" hint-placeholder-val="{{ true }}">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                          <sc-for list="{{ h.photos }}" as="p" hint-placeholder-count="2">
+                            <div style="aspect-ratio: 1; background: var(--bg-2); border: 1px solid var(--border-0); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+                              <span style="color: var(--fg-3); display: inline-flex;">{{ icoImage }}</span>
+                              <span style="font-family: var(--font-mono); font-size: 9px; color: var(--fg-3);">{{ p.name }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ h.noPhotos }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size: 11.5px; color: var(--fg-3);">{{ h.emptyNote }}</div>
+                      </sc-if>
+                    </div>
+                  </sc-if>
                 </div>
               </sc-for>
             </div>
           </div>
 
-          <button class="btn btn-secondary" onClick="{{ goCheckout }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Check out</button>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-secondary" onClick="{{ openOvertime }}" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13.5px;">{{ icoClock }} {{ overtimeLabel }}</button>
+            <button class="btn btn-secondary" onClick="{{ goCheckout }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Check out</button>
+          </div>
         </div>
       </sc-if>
 
@@ -279,7 +302,7 @@
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <button class="btn btn-primary" onClick="{{ doCheckout }}" disabled="{{ checkoutDisabled }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Confirm check-out · 17:00</button>
+            <button class="btn btn-primary" onClick="{{ doCheckout }}" disabled="{{ checkoutDisabled }}" style="width: 100%; justify-content: center; min-height: 48px; font-size: 14px; font-weight: 600;">Confirm check-out · {{ checkoutTime }}</button>
             <button class="btn btn-ghost" onClick="{{ backToShift }}" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13px; color: var(--fg-2);">Back to shift</button>
           </div>
         </div>
@@ -320,6 +343,47 @@
         </div>
       </sc-if>
 
+      <!-- ============ Check-out confirmation (shift not complete) ============ -->
+      <sc-if value="{{ showCheckoutConfirm }}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; inset: 0; z-index: 100; background: color-mix(in srgb, var(--fg-0) 45%, transparent); display: flex; align-items: center; justify-content: center; padding: 20px;" onClick="{{ cancelCheckout }}">
+          <div onClick="{{ stopProp }}" style="width: 100%; max-width: 320px; background: var(--bg-0); border: 1px solid var(--border-0); border-radius: var(--radius-lg); box-shadow: 0 12px 40px rgba(0,0,0,0.28); overflow: hidden;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 20px 8px; text-align: center;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--red-50); color: var(--red-600); display: flex; align-items: center; justify-content: center;">{{ icoAlert }}</div>
+              <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Check out now?</div>
+              <div style="font-size: 13px; color: var(--fg-2); line-height: 1.5;">{{ confirmBody }}</div>
+            </div>
+            <div style="margin: 12px 16px 0; padding: 10px 12px; background: var(--red-50); border: 1px solid var(--red-100); border-radius: var(--radius-sm); font-size: 12px; color: var(--red-700); line-height: 1.45;">If you check out, these become <span style="font-weight: 600;">Missed</span>. You can't upload them later.</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+              <button class="btn btn-red" onClick="{{ confirmCheckout }}" style="width: 100%; justify-content: center; min-height: 46px; font-size: 14px; font-weight: 600;">Check out anyway</button>
+              <button class="btn btn-secondary" onClick="{{ cancelCheckout }}" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13.5px;">Keep working</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ Overtime chooser ============ -->
+      <sc-if value="{{ showOvertime }}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; inset: 0; z-index: 100; background: color-mix(in srgb, var(--fg-0) 45%, transparent); display: flex; align-items: center; justify-content: center; padding: 20px;" onClick="{{ cancelOvertime }}">
+          <div onClick="{{ stopProp }}" style="width: 100%; max-width: 320px; background: var(--bg-0); border: 1px solid var(--border-0); border-radius: var(--radius-lg); box-shadow: 0 12px 40px rgba(0,0,0,0.28); overflow: hidden;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 20px 8px; text-align: center;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--bg-1); color: var(--fg-1); display: flex; align-items: center; justify-content: center;">{{ icoClock }}</div>
+              <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Work overtime?</div>
+              <div style="font-size: 13px; color: var(--fg-2); line-height: 1.5;">{{ otIntro }}</div>
+            </div>
+            <div style="display: flex; gap: 8px; padding: 14px 16px 4px;">
+              <sc-for list="{{ otOptions }}" as="o" hint-placeholder-count="4">
+                <button onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+            <div style="margin: 8px 16px 0; padding: 10px 12px; background: var(--bg-1); border: 1px solid var(--border-0); border-radius: var(--radius-sm); font-size: 12px; color: var(--fg-1); line-height: 1.45; text-align: center;">We'll add an hourly photo each hour until your new check-out at <span style="font-weight: 600;">{{ otNewEnd }}</span>.</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+              <button class="btn btn-primary" onClick="{{ confirmOvertime }}" style="width: 100%; justify-content: center; min-height: 46px; font-size: 14px; font-weight: 600;">Start overtime</button>
+              <button class="btn btn-secondary" onClick="{{ cancelOvertime }}" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13.5px;">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
     </div>
   </x-import>
 </div>
@@ -333,7 +397,8 @@
 // The missed section holds one hour at a time and always empties at the top of
 // the next hour: when H+1's window opens, H stops showing and locks as Missed.
 // So the open window and the missed section are never on screen together.
-const HOURS = [12, 13, 14, 15, 16];   // hours that require evidence
+const BASE_HOURS = [12, 13, 14, 15, 16];  // evidence hours of the scheduled shift
+const BASE_END = 17;                       // scheduled check-out hour
 const WINDOW_SEC = 5 * 60;            // on-time window from the top of the hour
 const HOUR_SEC = 60 * 60;
 const START_SEC = 13 * HOUR_SEC - 25; // demo starts 12:59:35, so 13:00 opens shortly
@@ -348,8 +413,29 @@ class Component extends DCLogic {
     photoSeq: 141,
 
     now: START_SEC,   // seconds since midnight — the single source of truth
-    subs: {}          // hour -> { status: 'done' | 'late', n: photoCount }
+    subs: {},         // hour -> { status: 'done' | 'late', n: photoCount }
+    confirmCheckout: false,  // check-out confirmation modal open
+    overtimeHours: 0,        // extra evidence hours added after the scheduled end
+    overtimeModal: false,    // overtime chooser modal open
+    otPick: 1,               // hours currently selected in the overtime chooser
+    openRow: null            // which timeline row's photo accordion is expanded
   };
+
+  // synthesize n placeholder photo tiles for a given time, e.g. 13:00 -> IMG_1301
+  photoTiles(n, timeStr) {
+    const base = (timeStr || '00:00').replace(':', '').slice(0, 2);
+    const out = [];
+    for (let i = 1; i <= n; i++) out.push({ name: 'IMG_' + base + (i < 10 ? '0' + i : '' + i) });
+    return out;
+  }
+
+  // evidence hours = scheduled shift + any overtime hours the officer added
+  hours() {
+    const l = BASE_HOURS.slice();
+    for (let i = 0; i < (this.state.overtimeHours || 0); i++) l.push(BASE_END + i);
+    return l;
+  }
+  endHour() { return BASE_END + (this.state.overtimeHours || 0); }
 
   componentDidMount() {
     this._t = setInterval(() => this.tick(), 1000);
@@ -382,11 +468,11 @@ class Component extends DCLogic {
   }
 
   openHour(now, subs) {
-    const h = HOURS.find(x => this.statusOf(x, now, subs) === 'open');
+    const h = this.hours().find(x => this.statusOf(x, now, subs) === 'open');
     return h === undefined ? null : h;
   }
   lateHour(now, subs) {
-    const h = HOURS.find(x => this.statusOf(x, now, subs) === 'lateopen');
+    const h = this.hours().find(x => this.statusOf(x, now, subs) === 'lateopen');
     return h === undefined ? null : h;
   }
 
@@ -432,17 +518,20 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     const showMissed = this.props.showMissedHour ?? true;
-    const go = (screen) => () => this.setState({ screen });
+    const go = (screen) => () => this.setState({ screen, confirmCheckout: false });
+
+    const HRS = this.hours();
+    const endHour = this.endHour();
 
     const openH = this.openHour(s.now, s.subs);
     const lateH = this.lateHour(s.now, s.subs);
     const open = openH !== null;
 
     // next hour whose window hasn't opened yet; falls through to check-out
-    const nextH = HOURS.find(h => this.statusOf(h, s.now, s.subs) === 'upcoming');
-    const nextAt = nextH === undefined ? 17 * HOUR_SEC : nextH * HOUR_SEC;
+    const nextH = HRS.find(h => this.statusOf(h, s.now, s.subs) === 'upcoming');
+    const nextAt = nextH === undefined ? endHour * HOUR_SEC : nextH * HOUR_SEC;
 
-    const hourLabel = this.label(openH === null ? (nextH === undefined ? 17 : nextH) : openH);
+    const hourLabel = this.label(openH === null ? (nextH === undefined ? endHour : nextH) : openH);
     const windowLeft = open ? (openH * HOUR_SEC + WINDOW_SEC - s.now) : 0;
 
     const screens = [['checkin', '1 CHECK-IN'], ['shift', '2 ON SHIFT'], ['checkout', '3 CHECK-OUT'], ['done', '4 DONE']];
@@ -455,39 +544,71 @@ class Component extends DCLogic {
     };
 
     const timeline = [
-      { time: '09:00', label: 'Check-in · GPS + 2 photos', status: 'Done', tone: 'green', dot: 'var(--success)' },
-      { time: '10:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' },
-      { time: '11:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)' }
+      { time: '09:00', label: 'Check-in · GPS + 2 photos', status: 'Done', tone: 'green', dot: 'var(--success)', pc: 2 },
+      { time: '10:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)', pc: 1 },
+      { time: '11:00', label: 'Hourly evidence · 1 photo', status: 'Done', tone: 'green', dot: 'var(--success)', pc: 1 }
     ];
-    HOURS.forEach(h => {
+    HRS.forEach(h => {
       const st = this.statusOf(h, s.now, s.subs);
       const n = (s.subs[h] && s.subs[h].n) || 1;
+      const ot = h >= BASE_END ? ' · overtime' : '';
       let row;
       if (st === 'open') row = { label: 'Hourly evidence · 5-min window open', status: this.fmt(h * HOUR_SEC + WINDOW_SEC - s.now) + ' left', tone: 'amber', dot: 'var(--warning)' };
       else if (st === 'lateopen') row = { label: 'Hourly evidence · late window open', status: 'Upload late', tone: 'red', dot: 'var(--red-500)' };
-      else if (st === 'upcoming' && h === nextH) row = { label: 'Hourly evidence · next up', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' };
-      else row = ROW[st](n);
+      else if (st === 'upcoming' && h === nextH) row = { label: 'Hourly evidence · next up' + ot, status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' };
+      else { row = ROW[st](n); if (ot && (st === 'upcoming')) row.label += ot; }
+      const sub = s.subs[h];
+      row.pc = sub ? sub.n : (st === 'done' ? 1 : 0);   // photos uploaded for this hour
       timeline.push(Object.assign({ time: this.label(h) }, row));
     });
-    timeline.push({ time: '17:00', label: 'Check-out · GPS + photo', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)' });
+    timeline.push({ time: this.hhmm(endHour * HOUR_SEC), label: 'Check-out · GPS + photo', status: 'Upcoming', tone: 'mono', dot: 'var(--border-1)', pc: 0 });
+
+    // enrich each row with photo-accordion fields; Upcoming rows are not expandable
+    const caretIcon = this.icon(['M6 9l6 6 6-6'], 14);
+    const timelineRows = timeline.map(r => {
+      const expandable = r.status !== 'Upcoming';
+      const isOpen = expandable && s.openRow === r.time;
+      return Object.assign({}, r, {
+        rowStyle: { display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', cursor: expandable ? 'pointer' : 'default' },
+        toggle: expandable ? (() => this.setState(st => ({ openRow: st.openRow === r.time ? null : r.time }))) : (() => {}),
+        caret: expandable ? caretIcon : null,
+        caretStyle: { display: 'inline-flex', color: 'var(--fg-3)', transition: 'transform 0.15s ease', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' },
+        open: isOpen,
+        hasPhotos: isOpen && r.pc > 0,
+        noPhotos: isOpen && r.pc === 0,
+        emptyNote: r.status === 'Missed' ? 'No photo — this hour was missed.' : 'Not uploaded yet.',
+        photos: this.photoTiles(r.pc, r.time)
+      });
+    });
 
     const doneCount = timeline.filter(h => h.status === 'Done').length;
     // only hours whose late window has closed count as missed; hours the demo
     // hasn't reached yet are assumed uploaded, as the original shift log did
-    const missedN = HOURS.filter(h => this.statusOf(h, s.now, s.subs) === 'missed').length;
+    const missedN = HRS.filter(h => this.statusOf(h, s.now, s.subs) === 'missed').length;
+
+    // hours the officer could still fulfil if they kept working
+    const pendingN = HRS.filter(h => ['upcoming', 'open', 'lateopen'].includes(this.statusOf(h, s.now, s.subs))).length;
+    const shiftIncomplete = pendingN + missedN > 0;
+    const shiftComplete = !shiftIncomplete;   // every evidence hour uploaded
+    const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+    const confirmBody =
+      pendingN && missedN ? 'You still have ' + plural(pendingN, 'upload') + ' left, and ' + missedN + ' ' + (missedN === 1 ? 'was' : 'were') + ' already missed.'
+      : pendingN ? 'You still have ' + plural(pendingN, 'upload') + ' left to do today.'
+      : 'You missed ' + plural(missedN, 'upload') + ' today.';
 
     const doneLog = [
       { time: '09:02', label: 'Checked in · GPS ±8 m · 2 photos', status: 'OK', tone: 'green', dot: 'var(--success)' },
       { time: '10–11', label: 'Hourly evidence uploads', status: '2 of 2', tone: 'green', dot: 'var(--success)' }
     ];
-    HOURS.forEach(h => {
+    HRS.forEach(h => {
       const st = this.statusOf(h, s.now, s.subs);
+      const otl = h >= BASE_END ? ' · overtime' : '';
       doneLog.push(Object.assign({ time: this.label(h) },
-        st === 'missed' ? { label: 'Hourly evidence', status: 'Missed', tone: 'red', dot: 'var(--red-500)' }
-        : st === 'late' ? { label: 'Hourly evidence · uploaded late', status: 'Late', tone: 'amber', dot: 'var(--warning)' }
+        st === 'missed' ? { label: 'Hourly evidence' + otl, status: 'Missed', tone: 'red', dot: 'var(--red-500)' }
+        : st === 'late' ? { label: 'Hourly evidence · uploaded late' + otl, status: 'Late', tone: 'amber', dot: 'var(--warning)' }
         : { label: 'Hourly evidence', status: 'OK', tone: 'green', dot: 'var(--success)' }));
     });
-    doneLog.push({ time: '17:00', label: 'Checked out · GPS ±6 m · ' + Math.max(s.checkoutPhotos.length, 1) + ' photo', status: 'OK', tone: 'green', dot: 'var(--success)' });
+    doneLog.push({ time: this.hhmm(endHour * HOUR_SEC), label: 'Checked out · GPS ±6 m · ' + Math.max(s.checkoutPhotos.length, 1) + ' photo', status: 'OK', tone: 'green', dot: 'var(--success)' });
 
     return {
       themeAttr: (this.props.darkTheme ?? false) ? 'dark' : 'light',
@@ -502,6 +623,7 @@ class Component extends DCLogic {
       icoCamera: this.icon(['M14.5 4h-5L7.4 6.5H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2h-3.4L14.5 4z', 'M12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z']),
       icoImage: this.icon(['M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z', 'M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z', 'M21 15l-5-5L5 21']),
       icoAlert: this.icon(['M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z', 'M12 9v4', 'M12 17h.01']),
+      icoClock: this.icon(['M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z', 'M12 6v6l4 2']),
       icoCheckBig: this.icon(['M20 6 9 17l-5-5'], 24),
 
       // check-in
@@ -550,9 +672,33 @@ class Component extends DCLogic {
         subs: Object.assign({}, st.subs, { [openH]: { status: 'done', n: st.hourPhotos.length } }),
         hourPhotos: []
       })),
-      timeline,
-      timelineMeta: doneCount + ' OF 9 DONE',
-      goCheckout: go('checkout'),
+      timeline: timelineRows,
+      timelineMeta: doneCount + ' OF ' + timeline.length + ' DONE',
+      // check-out is gated by a confirmation when evidence is still outstanding
+      goCheckout: shiftIncomplete ? (() => this.setState({ confirmCheckout: true })) : go('checkout'),
+      showCheckoutConfirm: s.confirmCheckout,
+      confirmBody,
+      confirmCheckout: () => this.setState({ confirmCheckout: false, screen: 'checkout' }),
+      cancelCheckout: () => this.setState({ confirmCheckout: false }),
+      stopProp: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      checkoutTime: this.hhmm(endHour * HOUR_SEC),
+
+      // overtime — extend the shift with more hourly evidence
+      overtimeLabel: s.overtimeHours ? 'Add more overtime' : 'Work overtime',
+      openOvertime: () => this.setState({ overtimeModal: true, otPick: 1 }),
+      showOvertime: s.overtimeModal,
+      otBaseEnd: this.hhmm(endHour * HOUR_SEC),
+      otNewEnd: this.hhmm((endHour + s.otPick) * HOUR_SEC),
+      otIntro: s.overtimeHours
+        ? 'You are already on overtime until ' + this.hhmm(endHour * HOUR_SEC) + '. Add more time?'
+        : 'Your shift ends at ' + this.hhmm(endHour * HOUR_SEC) + '. How much longer will you work?',
+      otOptions: [1, 2, 3, 4].map(v => ({
+        label: '+' + v + 'h',
+        style: Object.assign(this.chipStyle(s.otPick === v), { flex: 1, minHeight: '44px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }),
+        pick: () => this.setState({ otPick: v })
+      })),
+      confirmOvertime: () => this.setState(st => ({ overtimeModal: false, overtimeHours: st.overtimeHours + st.otPick })),
+      cancelOvertime: () => this.setState({ overtimeModal: false }),
 
       // check-out
       checkoutPhotos: this.mapPhotos('checkoutPhotos'),
@@ -573,7 +719,8 @@ class Component extends DCLogic {
         screen: 'checkin',
         checkinPhotos: [{ id: 'IMG_0139' }, { id: 'IMG_0140' }],
         hourPhotos: [], checkoutPhotos: [{ id: 'IMG_0158' }], latePhotos: [],
-        now: START_SEC, subs: {}
+        now: START_SEC, subs: {}, confirmCheckout: false,
+        overtimeHours: 0, overtimeModal: false, otPick: 1, openRow: null
       })
     };
   }
